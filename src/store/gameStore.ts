@@ -137,7 +137,6 @@ export const useGameStore = create<GameStore>()(
               const chance = move.effect.chance || 100;
               if (Math.random() * 100 < chance) {
                 wildPokemon.statusCondition = move.effect.statusCondition;
-                const statusName = move.effect.statusCondition.charAt(0).toUpperCase() + move.effect.statusCondition.slice(1);
                 battleLog.push(`Wild ${getPokemonById(wildPokemon.speciesId)?.name} was ${move.effect.statusCondition}!`);
               }
             }
