@@ -4,10 +4,19 @@ export const ITEMS: Record<string, Item> = {
   'potion': {
     id: 'potion',
     name: 'Potion',
-    description: 'Restores 20 HP',
+    description: 'Restores 30 HP',
     effect: {
       type: 'heal',
-      amount: 20,
+      amount: 30,
+    },
+  },
+  'super-potion': {
+    id: 'super-potion',
+    name: 'Super Potion',
+    description: 'Restores 50 HP',
+    effect: {
+      type: 'heal',
+      amount: 50,
     },
   },
   'awakening': {
@@ -36,6 +45,7 @@ export function getItemById(id: string): Item | undefined {
 
 export const STARTING_INVENTORY: Record<string, number> = {
   'potion': 5,
+  'super-potion': 1,
   'awakening': 2,
   'antidote': 2,
 };
