@@ -28,7 +28,7 @@ export default function BattleScreen() {
   const playerSpecies = getPokemonById(battle.playerPokemon.speciesId);
   const wildSpecies = getPokemonById(battle.wildPokemon.speciesId);
 
-  // Progressive message display with 1000ms delay
+  // Progressive message display with HP/status updates synced to messages
   useEffect(() => {
     if (!battle) return;
 
@@ -39,21 +39,68 @@ export default function BattleScreen() {
       const newMessages = battle.battleLog.slice(lastLogLengthRef.current);
       lastLogLengthRef.current = currentLogLength;
 
-      // Display new messages one at a time with 1000ms delay
-      newMessages.forEach((message, index) => {
+      // Helper to check if message triggers updates
+      const shouldUpdateWildHp = (msg: string) => {
+        return (msg.includes('used') && !msg.includes('Wild')) || msg.includes('Wild') && msg.includes('fainted');
+      };
+
+      const shouldUpdatePlayerHp = (msg: string) => {
+        return (msg.includes('Wild') && msg.includes('used')) || (msg.includes('hurt by poison') && !msg.includes('Wild'));
+      };
+
+      const shouldUpdatePlayerStatus = (msg: string) => {
+        return !msg.includes('Wild') && (msg.includes('was poisoned') || msg.includes('was asleep') ||
+               msg.includes('was paralyzed') || msg.includes('woke up'));
+      };
+
+      const shouldUpdateWildStatus = (msg: string) => {
+        return msg.includes('Wild') && (msg.includes('was poisoned') || msg.includes('was asleep') ||
+               msg.includes('was paralyzed') || msg.includes('woke up'));
+      };
+
+      // Display messages and schedule HP/status updates
+      let cumulativeDelay = 0;
+      newMessages.forEach((message) => {
+        // Display message
         setTimeout(() => {
           setDisplayedMessages((prev) => [...prev, message]);
-        }, index * 1000);
+        }, cumulativeDelay);
+        cumulativeDelay += 1000;
+
+        // Schedule HP updates 500ms after relevant messages
+        if (shouldUpdateWildHp(message)) {
+          setTimeout(() => {
+            setDisplayedWildHp(battle.wildPokemon.currentHp);
+          }, cumulativeDelay - 500);
+        }
+
+        if (shouldUpdatePlayerHp(message)) {
+          setTimeout(() => {
+            setDisplayedPlayerHp(battle.playerPokemon.currentHp);
+          }, cumulativeDelay - 500);
+        }
+
+        // Schedule status updates 500ms after relevant messages
+        if (shouldUpdatePlayerStatus(message)) {
+          setTimeout(() => {
+            setDisplayedPlayerStatus(battle.playerPokemon.statusCondition);
+          }, cumulativeDelay - 500);
+        }
+
+        if (shouldUpdateWildStatus(message)) {
+          setTimeout(() => {
+            setDisplayedWildStatus(battle.wildPokemon.statusCondition);
+          }, cumulativeDelay - 500);
+        }
       });
 
-      // Update HP and status 500ms after all messages are shown
-      const totalDelay = newMessages.length * 1000 + 500;
+      // Final sync to ensure everything is up to date
       setTimeout(() => {
         setDisplayedPlayerHp(battle.playerPokemon.currentHp);
         setDisplayedWildHp(battle.wildPokemon.currentHp);
         setDisplayedPlayerStatus(battle.playerPokemon.statusCondition);
         setDisplayedWildStatus(battle.wildPokemon.statusCondition);
-      }, totalDelay);
+      }, cumulativeDelay + 500);
     }
   }, [battle?.battleLog.length]);
 
