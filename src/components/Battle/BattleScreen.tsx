@@ -22,6 +22,7 @@ export default function BattleScreen() {
   const [displayedPlayerStatus, setDisplayedPlayerStatus] = useState<'normal' | 'poisoned' | 'asleep' | 'paralyzed'>('normal');
   const [displayedWildStatus, setDisplayedWildStatus] = useState<'normal' | 'poisoned' | 'asleep' | 'paralyzed'>('normal');
   const lastLogLengthRef = useRef(0);
+  const isProcessingRef = useRef(false);
 
   if (!battle) return null;
 
@@ -30,12 +31,13 @@ export default function BattleScreen() {
 
   // Progressive message display with HP/status updates synced to messages
   useEffect(() => {
-    if (!battle) return;
+    if (!battle || isProcessingRef.current) return;
 
     const currentLogLength = battle.battleLog.length;
 
     // Only process new messages
     if (currentLogLength > lastLogLengthRef.current) {
+      isProcessingRef.current = true;
       const newMessages = battle.battleLog.slice(lastLogLengthRef.current);
       lastLogLengthRef.current = currentLogLength;
 
@@ -100,6 +102,7 @@ export default function BattleScreen() {
         setDisplayedWildHp(battle.wildPokemon.currentHp);
         setDisplayedPlayerStatus(battle.playerPokemon.statusCondition);
         setDisplayedWildStatus(battle.wildPokemon.statusCondition);
+        isProcessingRef.current = false;
       }, cumulativeDelay + 500);
     }
   }, [battle?.battleLog.length]);
@@ -109,6 +112,7 @@ export default function BattleScreen() {
     if (battle?.phase === 'intro') {
       setDisplayedMessages([]);
       lastLogLengthRef.current = 0;
+      isProcessingRef.current = false;
       setDisplayedPlayerHp(battle.playerPokemon.currentHp);
       setDisplayedWildHp(battle.wildPokemon.currentHp);
       setDisplayedPlayerStatus(battle.playerPokemon.statusCondition);
