@@ -23,6 +23,7 @@ export default function BattleScreen() {
   const [displayedWildStatus, setDisplayedWildStatus] = useState<'normal' | 'poisoned' | 'asleep' | 'paralyzed'>('normal');
   const lastLogLengthRef = useRef(0);
   const isProcessingRef = useRef(false);
+  const currentBattleRef = useRef<number>(0);
 
   if (!battle) return null;
 
@@ -109,16 +110,21 @@ export default function BattleScreen() {
 
   // Reset displayed messages when a new battle starts
   useEffect(() => {
-    if (battle?.phase === 'intro') {
-      setDisplayedMessages([]);
-      lastLogLengthRef.current = 0;
-      isProcessingRef.current = false;
-      setDisplayedPlayerHp(battle.playerPokemon.currentHp);
-      setDisplayedWildHp(battle.wildPokemon.currentHp);
-      setDisplayedPlayerStatus(battle.playerPokemon.statusCondition);
-      setDisplayedWildStatus(battle.wildPokemon.statusCondition);
+    if (battle?.phase === 'intro' && battle.turn === 1 && battle.wildPokemon) {
+      const battleId = battle.wildPokemon.speciesId * 1000 + battle.turn;
+      if (currentBattleRef.current !== battleId) {
+        currentBattleRef.current = battleId;
+        // Clear all state for new battle
+        setDisplayedMessages([]);
+        lastLogLengthRef.current = 0;
+        isProcessingRef.current = false;
+        setDisplayedPlayerHp(battle.playerPokemon.currentHp);
+        setDisplayedWildHp(battle.wildPokemon.currentHp);
+        setDisplayedPlayerStatus(battle.playerPokemon.statusCondition);
+        setDisplayedWildStatus(battle.wildPokemon.statusCondition);
+      }
     }
-  }, [battle?.phase]);
+  }, [battle?.phase, battle?.turn, battle?.wildPokemon?.speciesId]);
 
   const handleMove = async (moveId: string) => {
     await executePlayerAction({ type: 'move', moveId });
