@@ -114,14 +114,19 @@ export default function BattleScreen() {
       const battleId = battle.wildPokemon.speciesId * 1000 + battle.turn;
       if (currentBattleRef.current !== battleId) {
         currentBattleRef.current = battleId;
-        // Clear all state for new battle
-        setDisplayedMessages([]);
-        lastLogLengthRef.current = 0;
+        // Clear all state for new battle - set refs synchronously
+        lastLogLengthRef.current = battle.battleLog.length; // Set to current length to mark as processed
         isProcessingRef.current = false;
+        setDisplayedMessages([]);
         setDisplayedPlayerHp(battle.playerPokemon.currentHp);
         setDisplayedWildHp(battle.wildPokemon.currentHp);
         setDisplayedPlayerStatus(battle.playerPokemon.statusCondition);
         setDisplayedWildStatus(battle.wildPokemon.statusCondition);
+
+        // Manually process the intro message
+        setTimeout(() => {
+          setDisplayedMessages([battle.battleLog[0]]);
+        }, 0);
       }
     }
   }, [battle?.phase, battle?.turn, battle?.wildPokemon?.speciesId]);
@@ -185,27 +190,35 @@ export default function BattleScreen() {
 
       {/* Battle Menu */}
       <div className="battle-menu">
-        {battle.phase === 'player-turn' && !showItemMenu && (
+        {(battle.phase === 'player-turn' || battle.phase === 'executing' || battle.phase === 'intro') && !showItemMenu && (
           <div className="menu-buttons">
             <div className="move-grid">
               {battle.playerPokemon.moves.map((moveId) => {
                 const move = getMoveById(moveId);
                 if (!move) return null;
                 return (
-                  <Button key={moveId} onClick={() => handleMove(moveId)}>
+                  <Button
+                    key={moveId}
+                    onClick={() => handleMove(moveId)}
+                    disabled={battle.phase !== 'player-turn'}
+                  >
                     {move.name}
                     <div className="move-type">{move.type.toUpperCase()}</div>
                   </Button>
                 );
               })}
             </div>
-            <Button variant="secondary" onClick={() => setShowItemMenu(true)}>
+            <Button
+              variant="secondary"
+              onClick={() => setShowItemMenu(true)}
+              disabled={battle.phase !== 'player-turn'}
+            >
               Items
             </Button>
           </div>
         )}
 
-        {battle.phase === 'player-turn' && showItemMenu && (
+        {showItemMenu && (battle.phase === 'player-turn' || battle.phase === 'executing') && (
           <div className="item-menu">
             <h3>Use Item</h3>
             <div className="item-grid">
@@ -217,14 +230,18 @@ export default function BattleScreen() {
                   <Button
                     key={itemId}
                     onClick={() => handleItem(itemId)}
-                    disabled={!canUseItem(itemId)}
+                    disabled={battle.phase !== 'player-turn' || !canUseItem(itemId)}
                   >
                     {item.name} ({count})
                   </Button>
                 );
               })}
             </div>
-            <Button variant="secondary" onClick={() => setShowItemMenu(false)}>
+            <Button
+              variant="secondary"
+              onClick={() => setShowItemMenu(false)}
+              disabled={battle.phase !== 'player-turn'}
+            >
               Back
             </Button>
           </div>
