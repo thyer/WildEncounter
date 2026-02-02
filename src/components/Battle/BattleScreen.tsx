@@ -21,6 +21,7 @@ export default function BattleScreen() {
   const [displayedWildHp, setDisplayedWildHp] = useState(0);
   const [displayedPlayerStatus, setDisplayedPlayerStatus] = useState<'normal' | 'poisoned' | 'asleep' | 'paralyzed'>('normal');
   const [displayedWildStatus, setDisplayedWildStatus] = useState<'normal' | 'poisoned' | 'asleep' | 'paralyzed'>('normal');
+  const [isAnimating, setIsAnimating] = useState(false);
   const lastLogLengthRef = useRef(0);
   const isProcessingRef = useRef(false);
   const currentBattleRef = useRef<number>(0);
@@ -39,6 +40,7 @@ export default function BattleScreen() {
     // Only process new messages
     if (currentLogLength > lastLogLengthRef.current) {
       isProcessingRef.current = true;
+      setIsAnimating(true);
       const newMessages = battle.battleLog.slice(lastLogLengthRef.current);
       lastLogLengthRef.current = currentLogLength;
 
@@ -104,6 +106,7 @@ export default function BattleScreen() {
         setDisplayedPlayerStatus(battle.playerPokemon.statusCondition);
         setDisplayedWildStatus(battle.wildPokemon.statusCondition);
         isProcessingRef.current = false;
+        setIsAnimating(false);
       }, cumulativeDelay + 500);
     }
   }, [battle?.battleLog.length]);
@@ -117,6 +120,7 @@ export default function BattleScreen() {
         // Clear all state for new battle - set refs synchronously
         lastLogLengthRef.current = battle.battleLog.length; // Set to current length to mark as processed
         isProcessingRef.current = false;
+        setIsAnimating(false);
         setDisplayedMessages([]);
         setDisplayedPlayerHp(battle.playerPokemon.currentHp);
         setDisplayedWildHp(battle.wildPokemon.currentHp);
@@ -190,7 +194,7 @@ export default function BattleScreen() {
 
       {/* Battle Menu */}
       <div className="battle-menu">
-        {(battle.phase === 'player-turn' || battle.phase === 'executing' || battle.phase === 'intro') && !showItemMenu && (
+        {battle.phase !== 'victory' && battle.phase !== 'defeat' && !showItemMenu && (
           <div className="menu-buttons">
             <div className="move-grid">
               {battle.playerPokemon.moves.map((moveId) => {
@@ -200,7 +204,7 @@ export default function BattleScreen() {
                   <Button
                     key={moveId}
                     onClick={() => handleMove(moveId)}
-                    disabled={battle.phase !== 'player-turn'}
+                    disabled={isAnimating || battle.phase !== 'player-turn'}
                   >
                     {move.name}
                     <div className="move-type">{move.type.toUpperCase()}</div>
@@ -211,14 +215,14 @@ export default function BattleScreen() {
             <Button
               variant="secondary"
               onClick={() => setShowItemMenu(true)}
-              disabled={battle.phase !== 'player-turn'}
+              disabled={isAnimating || battle.phase !== 'player-turn'}
             >
               Items
             </Button>
           </div>
         )}
 
-        {showItemMenu && (battle.phase === 'player-turn' || battle.phase === 'executing') && (
+        {showItemMenu && battle.phase !== 'victory' && battle.phase !== 'defeat' && (
           <div className="item-menu">
             <h3>Use Item</h3>
             <div className="item-grid">
@@ -230,7 +234,7 @@ export default function BattleScreen() {
                   <Button
                     key={itemId}
                     onClick={() => handleItem(itemId)}
-                    disabled={battle.phase !== 'player-turn' || !canUseItem(itemId)}
+                    disabled={isAnimating || battle.phase !== 'player-turn' || !canUseItem(itemId)}
                   >
                     {item.name} ({count})
                   </Button>
@@ -240,7 +244,7 @@ export default function BattleScreen() {
             <Button
               variant="secondary"
               onClick={() => setShowItemMenu(false)}
-              disabled={battle.phase !== 'player-turn'}
+              disabled={isAnimating || battle.phase !== 'player-turn'}
             >
               Back
             </Button>
