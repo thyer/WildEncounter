@@ -31,6 +31,10 @@ export default function BattleScreen() {
   const playerSpecies = getPokemonById(battle.playerPokemon.speciesId);
   const wildSpecies = getPokemonById(battle.wildPokemon.speciesId);
 
+  // Initialize displayed HP if not set (fixes zero HP display bug on new battles)
+  const actualDisplayedPlayerHp = displayedPlayerHp || battle.playerPokemon.currentHp;
+  const actualDisplayedWildHp = displayedWildHp || battle.wildPokemon.currentHp;
+
   // Progressive message display with HP/status updates synced to messages
   useEffect(() => {
     if (!battle || isProcessingRef.current) return;
@@ -158,7 +162,7 @@ export default function BattleScreen() {
           <div className="pokemon-info">
             <div className="pokemon-name">{wildSpecies?.name} Lv.{battle.wildPokemon.level}</div>
             <HealthBar
-              current={displayedWildHp}
+              current={actualDisplayedWildHp}
               max={battle.wildPokemon.maxHp}
             />
           </div>
@@ -175,7 +179,7 @@ export default function BattleScreen() {
           <div className="pokemon-info">
             <div className="pokemon-name">{playerSpecies?.name} Lv.{battle.playerPokemon.level}</div>
             <HealthBar
-              current={displayedPlayerHp}
+              current={actualDisplayedPlayerHp}
               max={battle.playerPokemon.maxHp}
             />
             <div className="pokemon-xp">
