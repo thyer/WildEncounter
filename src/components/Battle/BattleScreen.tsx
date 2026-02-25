@@ -3,7 +3,7 @@ import { useGameStore } from '../../store/gameStore';
 import { getMoveById } from '../../data/moves';
 import { getPokemonById } from '../../data/pokemon';
 import { getItemById, ITEMS } from '../../data/items';
-import { getSpriteUrl, getSpriteFallback } from '../../utils/sprites';
+import { getSpriteUrl } from '../../utils/sprites';
 import Button from '../UI/Button';
 import HealthBar from '../UI/HealthBar';
 import './BattleScreen.css';

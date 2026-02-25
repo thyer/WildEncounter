@@ -11,7 +11,7 @@ export function getSpriteUrl(pokemonId: number): string {
   return `${base}sprites/${pokemonId}.png`;
 }
 
-export function getSpriteFallback(pokemonId: number, pokemonName: string): string {
+export function getSpriteFallback(_pokemonId: number, pokemonName: string): string {
   // Returns the first letter as fallback if sprite doesn't load
   return pokemonName[0];
 }
