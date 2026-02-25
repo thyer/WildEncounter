@@ -9,6 +9,7 @@ export interface MoveEffect {
   statChange?: {
     stat: 'attack' | 'defense' | 'speed';
     amount: number; // Positive for boost, negative for reduction
+    target?: 'self' | 'opponent'; // Defaults to 'self'
   };
 }
 

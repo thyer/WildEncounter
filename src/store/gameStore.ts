@@ -114,11 +114,19 @@ export const useGameStore = create<GameStore>()(
           if (!checkAccuracy(move)) {
             battleLog.push('But it missed!');
           } else if (move.effect?.type === 'stat-change' && move.effect.statChange) {
-            // Handle stat-boosting moves
-            const { stat, amount } = move.effect.statChange;
-            playerPokemon.stats[stat] += amount;
+            // Handle stat-changing moves using stage multipliers (like standard Pokemon)
+            // Each stage step: +1 = x1.5, +2 = x2.0, -1 = x0.667, -2 = x0.5
+            const { stat, amount, target = 'self' } = move.effect.statChange;
             const statName = stat.charAt(0).toUpperCase() + stat.slice(1);
-            battleLog.push(`${getPokemonById(playerPokemon.speciesId)?.name}'s ${statName} rose!`);
+            const stageMultiplier = amount >= 0 ? (2 + amount) / 2 : 2 / (2 - amount);
+            if (target === 'opponent') {
+              wildPokemon.stats[stat] = Math.max(1, Math.round(wildPokemon.stats[stat] * stageMultiplier));
+              const wildName = `Wild ${getPokemonById(wildPokemon.speciesId)?.name}`;
+              battleLog.push(`${wildName}'s ${statName} ${amount < 0 ? 'fell' : 'rose'}!`);
+            } else {
+              playerPokemon.stats[stat] = Math.max(1, Math.round(playerPokemon.stats[stat] * stageMultiplier));
+              battleLog.push(`${getPokemonById(playerPokemon.speciesId)?.name}'s ${statName} ${amount < 0 ? 'fell' : 'rose'}!`);
+            }
           } else {
             const damage = calculateDamage(playerPokemon, wildPokemon, move);
             wildPokemon.currentHp = Math.max(0, wildPokemon.currentHp - damage);
@@ -245,11 +253,12 @@ export const useGameStore = create<GameStore>()(
             if (!checkAccuracy(wildMove)) {
               battleLog.push('But it missed!');
             } else if (wildMove.effect?.type === 'stat-change' && wildMove.effect.statChange) {
-              // Handle stat-boosting moves
+              // Handle stat-changing moves using stage multipliers
               const { stat, amount } = wildMove.effect.statChange;
-              wildPokemon.stats[stat] += amount;
+              const stageMultiplier = amount >= 0 ? (2 + amount) / 2 : 2 / (2 - amount);
+              wildPokemon.stats[stat] = Math.max(1, Math.round(wildPokemon.stats[stat] * stageMultiplier));
               const statName = stat.charAt(0).toUpperCase() + stat.slice(1);
-              battleLog.push(`Wild ${getPokemonById(wildPokemon.speciesId)?.name}'s ${statName} rose!`);
+              battleLog.push(`Wild ${getPokemonById(wildPokemon.speciesId)?.name}'s ${statName} ${amount < 0 ? 'fell' : 'rose'}!`);
             } else {
               const damage = calculateDamage(wildPokemon, playerPokemon, wildMove);
               playerPokemon.currentHp = Math.max(0, playerPokemon.currentHp - damage);

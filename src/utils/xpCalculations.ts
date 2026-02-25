@@ -40,6 +40,7 @@ export function levelUpPokemon(pokemon: PokemonInstance): PokemonInstance {
     maxHp: newMaxHp,
     currentHp: newMaxHp, // Restore to full HP on level up
     stats: newStats,
+    statusCondition: 'normal', // Clear status on level up
     experience: pokemon.experience - pokemon.experienceToNextLevel,
     experienceToNextLevel: getXpForNextLevel(newLevel),
   };

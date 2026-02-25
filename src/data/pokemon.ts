@@ -15,8 +15,8 @@ export const STARTER_POKEMON: PokemonSpecies[] = [
     name: 'Eevee',
     types: ['normal'],
     baseStats: { hp: 55, attack: 55, defense: 50, speed: 55 },
-    startingMoves: ['tackle', 'quick-attack'],
-    learnableMoves: ['body-slam'],
+    startingMoves: ['tackle', 'tail-whip'],
+    learnableMoves: ['body-slam', 'swift'],
   },
   {
     id: 54,

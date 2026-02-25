@@ -1,5 +1,6 @@
 import { STARTER_POKEMON } from '../../data/pokemon';
 import { useGameStore } from '../../store/gameStore';
+import { getSpriteUrl } from '../../utils/sprites';
 import Button from '../UI/Button';
 import './PokemonSelection.css';
 
@@ -32,6 +33,11 @@ export default function PokemonSelection() {
               className={`starter-card ${isSelected ? 'selected' : ''}`}
               onClick={() => handleSelectStarter(species.id)}
             >
+              <img
+                className="starter-sprite"
+                src={getSpriteUrl(species.id)}
+                alt={species.name}
+              />
               <div className="starter-name">{species.name}</div>
               <div className="starter-type">{species.types.join(' / ').toUpperCase()}</div>
               <div className="starter-stats">

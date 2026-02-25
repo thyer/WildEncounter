@@ -1,29 +1,29 @@
 .pokemon-selection {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 40px 20px;
+  padding: 20px 20px 80px;
   text-align: center;
 }
 
 .pokemon-selection h1 {
-  font-size: 48px;
+  font-size: 36px;
   color: #ffcb05;
   text-shadow: 3px 3px 0 #3b4cca;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
 }
 
 .starter-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  margin-bottom: 40px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
 }
 
 .starter-card {
   background: white;
   border: 4px solid #000;
   border-radius: 12px;
-  padding: 20px;
+  padding: 12px;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
   box-shadow: 4px 4px 0 #000;
@@ -41,26 +41,41 @@
   box-shadow: 8px 8px 0 #3b4cca;
 }
 
+.starter-sprite {
+  width: 72px;
+  height: 72px;
+  image-rendering: pixelated;
+  display: block;
+  margin: 0 auto 6px;
+}
+
 .starter-name {
-  font-size: 24px;
+  font-size: 18px;
   font-weight: bold;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .starter-type {
-  font-size: 14px;
+  font-size: 12px;
   color: #666;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 .starter-stats {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  font-size: 14px;
+  gap: 4px;
+  font-size: 12px;
   font-weight: bold;
 }
 
 .start-button-container {
-  margin-top: 40px;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px;
+  background: linear-gradient(transparent, rgba(0,0,0,0.15) 30%, rgba(0,0,0,0.35));
+  display: flex;
+  justify-content: center;
 }

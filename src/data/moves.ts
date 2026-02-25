@@ -52,6 +52,32 @@ export const MOVES: Record<string, Move> = {
     accuracy: 100,
     pp: 15,
   },
+  'swift': {
+    id: 'swift',
+    name: 'Swift',
+    type: 'normal',
+    category: 'special',
+    power: 100,
+    accuracy: 100,
+    pp: 20,
+  },
+  'tail-whip': {
+    id: 'tail-whip',
+    name: 'Tail Whip',
+    type: 'normal',
+    category: 'status',
+    power: 0,
+    accuracy: 100,
+    pp: 30,
+    effect: {
+      type: 'stat-change',
+      statChange: {
+        stat: 'defense',
+        amount: -2,
+        target: 'opponent',
+      },
+    },
+  },
   'harden': {
     id: 'harden',
     name: 'Harden',

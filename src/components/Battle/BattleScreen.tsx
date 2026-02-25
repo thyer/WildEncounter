@@ -3,6 +3,7 @@ import { useGameStore } from '../../store/gameStore';
 import { getMoveById } from '../../data/moves';
 import { getPokemonById } from '../../data/pokemon';
 import { getItemById, ITEMS } from '../../data/items';
+import { getSpriteUrl, getSpriteFallback } from '../../utils/sprites';
 import Button from '../UI/Button';
 import HealthBar from '../UI/HealthBar';
 import './BattleScreen.css';
@@ -12,10 +13,12 @@ export default function BattleScreen() {
   const executePlayerAction = useGameStore((state) => state.executePlayerAction);
   const endBattle = useGameStore((state) => state.endBattle);
   const startBattle = useGameStore((state) => state.startBattle);
+  const resetGame = useGameStore((state) => state.resetGame);
   const canUseItem = useGameStore((state) => state.canUseItem);
   const inventory = useGameStore((state) => state.player.inventory);
 
   const [showItemMenu, setShowItemMenu] = useState(false);
+  const [showRestartConfirm, setShowRestartConfirm] = useState(false);
   const [displayedMessages, setDisplayedMessages] = useState<string[]>([]);
   const [displayedPlayerHp, setDisplayedPlayerHp] = useState(0);
   const [displayedWildHp, setDisplayedWildHp] = useState(0);
@@ -167,14 +170,42 @@ export default function BattleScreen() {
             />
           </div>
           <div className={`pokemon-sprite wild-sprite status-${displayedWildStatus}`}>
-            {wildSpecies?.name[0]}
+            <img
+              src={getSpriteUrl(battle.wildPokemon.speciesId)}
+              alt={wildSpecies?.name}
+              className="sprite-image"
+              onError={(e) => {
+                // Fallback to letter if sprite doesn't load
+                e.currentTarget.style.display = 'none';
+                if (e.currentTarget.nextSibling) {
+                  (e.currentTarget.nextSibling as HTMLElement).style.display = 'flex';
+                }
+              }}
+            />
+            <div className="sprite-fallback" style={{ display: 'none' }}>
+              {wildSpecies?.name[0]}
+            </div>
           </div>
         </div>
 
         {/* Player Pokemon */}
         <div className="pokemon-display player">
           <div className={`pokemon-sprite player-sprite status-${displayedPlayerStatus}`}>
-            {playerSpecies?.name[0]}
+            <img
+              src={getSpriteUrl(battle.playerPokemon.speciesId)}
+              alt={playerSpecies?.name}
+              className="sprite-image"
+              onError={(e) => {
+                // Fallback to letter if sprite doesn't load
+                e.currentTarget.style.display = 'none';
+                if (e.currentTarget.nextSibling) {
+                  (e.currentTarget.nextSibling as HTMLElement).style.display = 'flex';
+                }
+              }}
+            />
+            <div className="sprite-fallback" style={{ display: 'none' }}>
+              {playerSpecies?.name[0]}
+            </div>
           </div>
           <div className="pokemon-info">
             <div className="pokemon-name">{playerSpecies?.name} Lv.{battle.playerPokemon.level}</div>
@@ -216,13 +247,23 @@ export default function BattleScreen() {
                 );
               })}
             </div>
-            <Button
-              variant="secondary"
-              onClick={() => setShowItemMenu(true)}
-              disabled={isAnimating || battle.phase !== 'player-turn'}
-            >
-              Items
-            </Button>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <Button
+                variant="secondary"
+                onClick={() => setShowItemMenu(true)}
+                disabled={isAnimating || battle.phase !== 'player-turn'}
+              >
+                Items
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => setShowRestartConfirm(true)}
+                disabled={isAnimating}
+                style={{ fontSize: '12px', padding: '8px 12px' }}
+              >
+                Restart Adventure
+              </Button>
+            </div>
           </div>
         )}
 
@@ -259,6 +300,13 @@ export default function BattleScreen() {
           <div className="victory-menu">
             <h2>Victory!</h2>
             <Button onClick={handleNextBattle}>Next Battle</Button>
+            <Button
+              variant="secondary"
+              onClick={() => setShowRestartConfirm(true)}
+              style={{ marginTop: '12px' }}
+            >
+              Restart Adventure
+            </Button>
           </div>
         )}
 
@@ -268,6 +316,22 @@ export default function BattleScreen() {
             <Button onClick={() => endBattle({ victory: false, xpGained: 0, leveledUp: false })}>
               Return
             </Button>
+            <Button
+              variant="secondary"
+              onClick={() => setShowRestartConfirm(true)}
+              style={{ marginTop: '12px' }}
+            >
+              Restart Adventure
+            </Button>
+          </div>
+        )}
+        {showRestartConfirm && (
+          <div className="restart-confirm-overlay">
+            <p className="restart-confirm-text">Restart your adventure?<br/>All progress will be lost.</p>
+            <div className="restart-confirm-buttons">
+              <Button onClick={resetGame}>Yes, restart</Button>
+              <Button variant="secondary" onClick={() => setShowRestartConfirm(false)}>Cancel</Button>
+            </div>
           </div>
         )}
       </div>
